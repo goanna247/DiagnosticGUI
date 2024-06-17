@@ -1,0 +1,7 @@
+src/crank-canvas.cpp
+src/crank-canvas.h
+src/main.cpp
+src/main.h
+src/thread.cpp
+src/thread.h
+src/uuid.h
