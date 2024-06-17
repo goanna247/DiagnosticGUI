@@ -12,7 +12,7 @@ include_directories(
   /usr/include/dbus-1.0
   /usr/lib/x86_64-linux-gnu/dbus-1.0/include
 #  /usr/include/gio-unix-2.0
-  ~/Software/bluez-source
+  ${PROJECT_SOURCE_DIR}/bluez
 )
 
 
@@ -23,8 +23,8 @@ add_executable(diagnostic
 )
 
 target_link_directories(diagnostic PUBLIC
-  ~/Software/bluez-source/gdbus/.libs
-  ~/Software/bluez-source/src/.libs
+  ${PROJECT_SOURCE_DIR}/bluez/gdbus/.libs
+  ${PROJECT_SOURCE_DIR}/bluez/src/.libs
 )
 
 target_link_libraries(diagnostic PUBLIC
