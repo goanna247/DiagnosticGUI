@@ -81,7 +81,7 @@ bool IC2App::OnInit()
 // -------------------------------------------------------------------------------------------------
 // The main frame
 // -------------------------------------------------------------------------------------------------
-IC2Frame::IC2Frame() : wxFrame(NULL, wxID_ANY,  wxT("Verve IC2 Diagnostic Tool"), wxPoint(50, 50), wxSize(800, 600))
+IC2Frame::IC2Frame() : wxFrame(NULL, wxID_ANY,  wxT("Verve IC2 Diagnostic Tool"), wxPoint(50, 50), wxSize(1500, 768))
 {
     printf("\n%d %s %s\n", __LINE__, __FUNCTION__, __FILE__);
     // The icon in the title bar
@@ -1265,6 +1265,15 @@ IC2Frame::IC2Frame() : wxFrame(NULL, wxID_ANY,  wxT("Verve IC2 Diagnostic Tool")
     x_dot = new wxTextCtrl(infoCrank_raw, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC));
     x_ddot = new wxTextCtrl(infoCrank_raw, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC));
 
+    partnerdata[0] = new wxTextCtrl(infoCrank_raw, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC));
+    partnerdata[0]->SetToolTip(L"Power");
+    partnerdata[0]->Disable();
+    partnerdata[1] = new wxTextCtrl(infoCrank_raw, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC));
+    partnerdata[1]->SetToolTip(L"Torque");
+    partnerdata[1]->Disable();
+    partnerdata[2] = new wxTextCtrl(infoCrank_raw, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC));
+    partnerdata[2]->SetToolTip(L"Energy");
+
     wxToggleButton *notifyRaw = new wxToggleButton(infoCrank_raw, wxID_ANY, "Notify");
     wxCheckBox *loggingRaw = new wxCheckBox(infoCrank_raw, wxID_ANY, "/dev/null");
     wxButton *logFileRaw = new wxButton(infoCrank_raw, wxID_ANY, "...", wxDefaultPosition, wxSize(50, 20));
@@ -1666,7 +1675,7 @@ IC2Frame::IC2Frame() : wxFrame(NULL, wxID_ANY,  wxT("Verve IC2 Diagnostic Tool")
         sizer->SetFlexibleDirection(wxVERTICAL);
         sizer->AddGrowableCol(0);
         sizer->AddGrowableCol(1);
-        sizer->AddGrowableRow(3);
+        sizer->AddGrowableRow(4);
         {
             wxStaticBoxSizer *staticBoxSizer = new wxStaticBoxSizer(wxVERTICAL, infoCrank_raw, "Strain");
             {
@@ -1781,8 +1790,24 @@ IC2Frame::IC2Frame() : wxFrame(NULL, wxID_ANY,  wxT("Verve IC2 Diagnostic Tool")
             sizer->Add(staticBoxSizer, groupBoxFlags);
         }
 
+        {
+            wxStaticBoxSizer *staticBoxSizer = new wxStaticBoxSizer(wxVERTICAL, infoCrank_raw, "Partner Data");
+            {
+                wxFlexGridSizer *gridSizer = new wxFlexGridSizer(3, 0, 0);
+                gridSizer->Add(new wxStaticText(infoCrank_raw, wxID_ANY, "Power"), centreFlags);
+                gridSizer->Add(new wxStaticText(infoCrank_raw, wxID_ANY, "Torque"), centreFlags);
+                gridSizer->Add(new wxStaticText(infoCrank_raw, wxID_ANY, "Energy"), centreFlags);
+                gridSizer->Add(partnerdata[0]);
+                gridSizer->Add(partnerdata[1]);
+                gridSizer->Add(partnerdata[2]);
+                staticBoxSizer->Add(gridSizer, centreFlags);
+            }
+            sizer->Add(staticBoxSizer, groupBoxFlags);
+        }
 
-//        sizer->AddStretchSpacer();
+
+
+        sizer->AddStretchSpacer();
         sizer->AddStretchSpacer();
         sizer->AddStretchSpacer();
 
@@ -3057,6 +3082,13 @@ void IC2Frame::SetInfoCrankRawData(void *str, int length)
             } state;
             float vector4[4];
             float matrix33[3][3];
+            struct {
+                int16_t flags;
+                int16_t power;
+                int16_t torque;
+                int16_t energy;
+            } partner_data;
+
         } data;
     } *raw_data = (struct raw_data *) str;
     uint8_t *byte_pointer_to_raw_data = (uint8_t *) raw_data;
@@ -3070,6 +3102,7 @@ void IC2Frame::SetInfoCrankRawData(void *str, int length)
         STATE_DATA,
         VECTOR4,
         MATRIX33,
+        PARTNER_DATA,
     };
     while (length) {
         switch (raw_data->op_code) {
@@ -3209,6 +3242,17 @@ void IC2Frame::SetInfoCrankRawData(void *str, int length)
                    raw_data->data.matrix33[1][0], raw_data->data.matrix33[2][1], raw_data->data.matrix33[2][2]);
             length -= 37;
             byte_pointer_to_raw_data += 37;
+            raw_data = (struct raw_data *) byte_pointer_to_raw_data;
+            break;
+        case PARTNER_DATA:
+            //volts = 0.6f*6.0f*raw_data->data.voltage*0x01p-12;
+            {
+                partnerdata[0]->SetValue(wxString().Format("%hd W", raw_data->data.partner_data.power));
+                partnerdata[1]->SetValue(wxString().Format("%0.2f N.m", raw_data->data.partner_data.torque / 32.0f));
+                partnerdata[2]->SetValue(wxString().Format("%hd KJ", raw_data->data.partner_data.energy));
+            }
+            length -= 9;
+            byte_pointer_to_raw_data += 9;
             raw_data = (struct raw_data *) byte_pointer_to_raw_data;
             break;
         default :

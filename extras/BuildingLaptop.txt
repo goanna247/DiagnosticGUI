@@ -27,3 +27,12 @@ apt-get install firmware-realtek
 # Mount network drive
 #/etc/fstab
 #//192.168.0.6/david /mnt/fractal    cifs    noauto,user,username=david,password=david,file_mode=0777,dir_mode=0777,uid=1000,gid=1000,rw,exec       0       0
+
+# David Staer's additions after setting up on Ubuntu 22.04
+
+#deps as above
+sudo apt install build-essential ssh libwxgtk3.0-gtk3-dev libgsl-dev libexplain-dev libdbus-1-dev libglib2.0-dev libglew-dev 
+
+#reqs for bluez compilation
+sudo apt install automake libtool libudev-dev libical-dev libcups2-dev libreadline-dev python3-docutils
+#NOTE: libcups2-dev did not include a pkg-config file in the jammy deb - I had to add mantic repositories to apt/sources.list to get a workable version

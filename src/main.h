@@ -234,6 +234,19 @@ class IC2Frame : public wxFrame
     wxTextCtrl *accel2_avg[3];
     wxTextCtrl *accel2_sd[3];
     wxRadioBox *orientation;
+    // Partner power data via diagnsotic interface
+    wxCheckBox *partner_pedalPowerBalancePresent;
+    wxCheckBox *partner_accumulatedTorquePresent;
+    wxCheckBox *partner_wheelRevolutionDataPresent;
+    wxCheckBox *partner_crankRevolutionDataPresent;
+    wxCheckBox *partner_extremeForceMagnitudesPresent;
+    wxCheckBox *partner_extremeTorqueMagnitudesPresent;
+    wxCheckBox *partner_extremeAnglesPresent;
+    wxCheckBox *partner_topDeadSpotAnglePresent;
+    wxCheckBox *partner_bottomDeadSpotAnglePresent;
+    wxCheckBox *partner_accumulatedEnergyPresent;
+    wxCheckBox *partner_offsetCompensationIndicator;
+    wxTextCtrl *partnerdata[3];
 
     wxTextCtrl *x;
     wxTextCtrl *x_dot;
@@ -263,6 +276,11 @@ class IC2Frame : public wxFrame
     double accel2Y_sum2;
     double accel2Z_sum;
     double accel2Z_sum2;
+
+    uint16_t partner_flags;
+    uint16_t partner_power;
+    uint16_t partner_torque;
+    uint16_t partner_energy;
 
     // The accelerometer output in each of the 6 orientations
     double gravity1matrix[18] = {
